@@ -1,12 +1,13 @@
 /*
  * @Author: vihowe
  * @Date: 2022-02-17 15:11:02
- * @LastEditTime: 2022-02-22 16:27:08
+ * @LastEditTime: 2022-02-23 10:19:44
  * @FilePath: /Algorithm/leetcode/linkList.cc
  */
 
 #include <unordered_set>
 #include <iostream>
+
 
 struct ListNode {
   int val;
@@ -87,8 +88,8 @@ public:
       return head;
     }
 
-    ListNode *slow = head, *fast = head->next;
-    while (fast && fast->next)
+    ListNode *slow = head, *fast = head;
+    while (fast->next && fast->next->next)
     {
       fast = fast->next->next;
       slow = slow->next;
@@ -201,17 +202,214 @@ public:
     }
     return ret->next;
   }
+
+  ListNode* getIntersectionNode(ListNode *headA, ListNode *headB)
+  {
+    int n1 = 0, n2 = 0;
+    ListNode *temp = headA;
+    while(temp)
+    {
+      n1++;
+      temp = temp->next;
+    }
+    temp = headB;
+    while(temp)
+    {
+      n2++;
+      temp = temp->next;
+    }
+
+    int d = abs(n1 - n2);
+    if (n1 > n2)
+    {
+      while (d)
+      {
+        headA = headA->next;
+        d--;
+      }
+    }
+    else
+    {
+      while (d)
+      {
+        headB = headB->next;
+        d--;
+      }
+    }
+    while (headA && headB)
+    {
+      if (headA == headB)
+      {
+        return headA;
+      }
+      headA = headA->next;
+      headB = headB->next;
+    }
+    return nullptr;
+
+  }
+
+  ListNode* reverseList(ListNode* head)
+  {
+    ListNode *pre = nullptr, *cur = head, *next = nullptr;
+    while (cur)
+    {
+      next = cur->next;
+      cur->next = pre;
+      pre = cur;
+      cur = next;
+    }
+    return pre;
+  }
+
+  ListNode* reverseList2(ListNode *head)
+  {
+    if (!head || !head->next)
+    {
+      return head;
+    }
+    ListNode *newHead = reverseList2(head->next);
+    head->next->next = head;
+    head->next = nullptr;
+    return newHead;
+  }
+
+
+  ListNode* front;
+
+  bool checkRrecurrsive(ListNode* curr)
+  {
+    if (curr)
+    {
+      if (!checkRrecurrsive(curr->next))
+      {
+        return false;
+      }
+      if (front->val != curr->val)
+      {
+        return false;
+      }
+      front = front->next;
+      return true;
+    }
+    return true;
+  }
+  bool isPalindrome(ListNode *head)
+  {
+    front = head;
+    return checkRrecurrsive(head);
+  }
+
+  bool isPalindrome2(ListNode *head)
+  {
+    if (!head || !head->next)
+    {
+      return true;
+    }
+    ListNode *slow = head, *fast = head;
+    ListNode *pre = head, *prepre = nullptr;
+    while (fast && fast->next)
+    {
+      pre = slow;
+      slow = slow->next;
+      fast = fast->next->next;
+      pre->next = prepre;
+      prepre = pre;
+    }
+    if (fast)
+    {
+      slow = slow->next;
+    }
+    while (pre && slow)
+    {
+      if (pre->val != slow->val)
+      {
+        return false;
+      }
+      pre = pre->next;
+      slow = slow->next;
+    }
+  }
+
+  void deleteNode(ListNode *node)
+  {
+    // can not access the head node, so we need to find the previous node
+    // just to delete the value of node
+    node->val = node->next->val;
+    node->next = node->next->next;
+  }
+
+  ListNode* oddEvenList(ListNode *head)
+  {
+    if (!head || !head->next || !head->next->next)
+    {
+      return head;
+    }
+    int n = 0;
+    ListNode *temp = head;
+    while (temp)
+    {
+      n++;
+      temp = temp->next;
+    }
+    int k = (n - 1) / 2;
+    for (int i = 1; i <= k; ++i)
+    {
+      ListNode *start = head, *pre = nullptr;
+      int j = i;
+      while(j--)
+      {
+        pre = start;
+        start = start->next;
+      }
+
+      int round = k - i + 1;
+      while (round--)
+      {
+        // swap (start, start->next)
+        temp = start->next;
+        start->next = start->next->next;
+        pre->next = temp;
+        temp->next = start;
+        pre = start;
+        start = start->next;
+      }
+    }
+    return head;
+  }
+
+  ListNode* oddEvenList2(ListNode *head)
+  {
+    if (!head || !head->next || !head->next->next)
+    {
+      return head;
+    }
+    ListNode *odd = head, *evenHead = head->next, *even = head->next;
+    while(even && even->next)
+    {
+      odd->next = even->next;
+      odd = odd->next;
+      even->next = odd->next;
+      even = even->next;
+    }
+    odd->next = evenHead;
+    return head;
+  }
 };
 
 int main()
 {
-  ListNode *head = new ListNode(4);
-  head->next = new ListNode(2);
-  head->next->next = new ListNode(1);
-  head->next->next->next = new ListNode(3);
+  ListNode *head = new ListNode(2);
+  head->next = new ListNode(1);
+  head->next->next = new ListNode(3);
+  head->next->next->next = new ListNode(5);
+  head->next->next->next->next = new ListNode(6);
+  head->next->next->next->next->next = new ListNode(4);
+  head->next->next->next->next->next->next = new ListNode(7);
+
 
   Solution s;
-  head = s.sortList3(head);
+  head = s.oddEvenList(head);
   while (head)
   {
     std::cout << head->val << " ";
