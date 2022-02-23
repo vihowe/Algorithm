@@ -1,12 +1,13 @@
 /*
  * @Author: vihowe
  * @Date: 2022-01-31 10:18:32
- * @LastEditTime: 2022-02-14 16:47:22
- * @FilePath: /leetcode/wordBreak.cc
+ * @LastEditTime: 2022-02-23 14:09:07
+ * @FilePath: /Algorithm/leetcode/wordBreak.cc
  */
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <iostream>
 
 class Solution{
 public:
@@ -44,7 +45,7 @@ public:
   }
 
 
-  bool wordBreak(std::string s, std::vector<std::string>& wordDict) {
+  bool wordBreak2(std::string s, std::vector<std::string>& wordDict) {
     auto dp = std::vector<bool> (s.size() + 1, false);
     auto ws = std::unordered_set<std::string> ();
     for (auto word : wordDict) {
@@ -60,4 +61,59 @@ public:
     }
     return dp[s.size()];
   }
+
+  std::vector<std::string> ret;
+  void dfs(std::string s, std::unordered_set<std::string> wordSet, 
+           int start, std::vector<std::string> temp)
+  {
+    if (start == s.size())
+    {
+      std::string r_temp;
+      for (int i = 0; i < temp.size(); ++i)
+      {
+        r_temp += temp[i];
+        if (i < temp.size() - 1)
+          r_temp += " ";
+      }
+      ret.push_back(r_temp);
+      return;
+    }
+
+    for (int end = start; end < s.size(); ++end)
+    {
+      std::string sub = s.substr(start, end - start + 1);
+      if (wordSet.find(sub) != wordSet.end())
+      {
+        temp.push_back(sub);
+        dfs(s, wordSet, end + 1, temp);
+        temp.pop_back();
+      }
+    }
+    return;
+  }
+  
+  std::vector<std::string> wordBreak4(std::string s, std::vector<std::string> wordDict)
+  {
+    auto wordSet = std::unordered_set<std::string> ();
+    for (auto word : wordDict)
+    {
+      wordSet.insert(word);
+    }
+    std::vector<std::string> temp;    // store the intermediate result
+    dfs(s, wordSet, 0, temp);
+    return ret;
+  }
 };
+
+int main()
+{
+  std::vector<std::string> wordDict {"cats", "dog", "sand", "and", "cat"};
+  std::string s {"catsanddog"};
+
+  Solution ss;
+  std::vector<std::string> ret = ss.wordBreak4(s, wordDict);
+  for (auto s : ret)
+  {
+    std::cout << s << std::endl;
+  }
+}
